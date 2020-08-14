@@ -1,0 +1,17 @@
+sudo : required
+services :
+  - docker
+before_install:
+  - docker build -t rakeshakkati/react-test -f ./client/dockerfile.dev ./client
+script:
+  - docker run -e CI=true rakeshakkati/react-test npm test
+after_success:
+  - docker build -t rakeshakkati/multi-client ./client
+  - docker build -t rakeshakkati/multi-nginx ./nginx
+  - docker build -t rakeshakkati/multi-server ./server
+  - docker build -t rakeshakkati/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push rakeshakkati/multi-client
+  - docker push rakeshakkati/multi-nginx
+  - docker push rakeshakkati/multi-server
+  - docker push rakeshakkati/multi-worker
